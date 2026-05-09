@@ -8,108 +8,97 @@ namespace BugTests
     public class UnitTest1
     {
         [TestMethod]
-        public void CheckInitialStatusIsNew()
-        {
+        public void TestInitial() {
             Bug b = new Bug();
             Assert.AreEqual(Status.New, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void ActionToAnalysisChangesStatus()
-        {
+        public void TestToAnalysis() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
+            b.ApplyAction(BugTrigger.ToAnalysis);
             Assert.AreEqual(Status.Analyzing, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void ActionPostponeKeepsInAnalyzing()
-        {
+        public void TestPostpone() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.Postpone);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.Postpone);
             Assert.AreEqual(Status.Analyzing, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void ActionRejectMovesToReverted()
-        {
+        public void TestReject() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.Reject);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.Reject);
             Assert.AreEqual(Status.Reverted, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void HappyPathToClosed()
-        {
+        public void TestHappyPath() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.ToFix);
-            b.ApplyAction(Action.ToVerify);
-            b.ApplyAction(Action.FixOk);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.ToFix);
+            b.ApplyAction(BugTrigger.ToVerify);
+            b.ApplyAction(BugTrigger.FixOk);
             Assert.AreEqual(Status.Closed, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void FixFailedMovesToReverted()
-        {
+        public void TestFixFailed() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.ToFix);
-            b.ApplyAction(Action.ToVerify);
-            b.ApplyAction(Action.FixFailed);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.ToFix);
+            b.ApplyAction(BugTrigger.ToVerify);
+            b.ApplyAction(BugTrigger.FixFailed);
             Assert.AreEqual(Status.Reverted, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void CantReproduceMovesToReverted()
-        {
+        public void TestCantRepro() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.ToFix);
-            b.ApplyAction(Action.CantReproduce);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.ToFix);
+            b.ApplyAction(BugTrigger.CantReproduce);
             Assert.AreEqual(Status.Reverted, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void ReopenFromRevertedMovesToAnalyzing()
-        {
+        public void TestReopenFromReverted() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.Reject);
-            b.ApplyAction(Action.Reopen);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.Reject);
+            b.ApplyAction(BugTrigger.Reopen);
             Assert.AreEqual(Status.Analyzing, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void CloseFromRevertedMovesToClosed()
-        {
+        public void TestCloseFromReverted() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.Reject);
-            b.ApplyAction(Action.Close);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.Reject);
+            b.ApplyAction(BugTrigger.Close);
             Assert.AreEqual(Status.Closed, b.CurrentStatus);
         }
 
         [TestMethod]
-        public void ReopenFromClosedMovesToAnalyzing()
-        {
+        public void TestReopenFromClosed() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToAnalysis);
-            b.ApplyAction(Action.ToFix);
-            b.ApplyAction(Action.ToVerify);
-            b.ApplyAction(Action.FixOk);
-            b.ApplyAction(Action.Reopen);
+            b.ApplyAction(BugTrigger.ToAnalysis);
+            b.ApplyAction(BugTrigger.ToFix);
+            b.ApplyAction(BugTrigger.ToVerify);
+            b.ApplyAction(BugTrigger.FixOk);
+            b.ApplyAction(BugTrigger.Reopen);
             Assert.AreEqual(Status.Analyzing, b.CurrentStatus);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void WrongActionThrowsException()
-        {
+        public void TestInvalidTransition() {
             Bug b = new Bug();
-            b.ApplyAction(Action.ToFix);
+            b.ApplyAction(BugTrigger.ToFix);
         }
     }
 }
