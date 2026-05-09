@@ -13,7 +13,7 @@ namespace BugApp
         Closed
     }
 
-    public enum Action
+    public enum BugTrigger
     {
         ToAnalysis, 
         Postpone, 
@@ -29,41 +29,41 @@ namespace BugApp
 
     public class Bug
     {
-        private StateMachine<Status, Action> stateMachine;
+        private StateMachine<Status, BugTrigger> stateMachine;
 
         public Status CurrentStatus => stateMachine.State;
 
         public Bug()
         {
-            stateMachine = new StateMachine<Status, Action>(Status.New);
+            stateMachine = new StateMachine<Status, BugTrigger>(Status.New);
 
             stateMachine.Configure(Status.New)
-                .Permit(Action.ToAnalysis, Status.Analyzing);
+                .Permit(BugTrigger.ToAnalysis, Status.Analyzing);
 
             stateMachine.Configure(Status.Analyzing)
-                .PermitReentry(Action.Postpone) // Остается в том же статусе
-                .Permit(Action.Reject, Status.Reverted)
-                .Permit(Action.ToFix, Status.Fixing);
+                .PermitReentry(BugTrigger.Postpone) 
+                .Permit(BugTrigger.Reject, Status.Reverted)
+                .Permit(BugTrigger.ToFix, Status.Fixing);
 
             stateMachine.Configure(Status.Fixing)
-                .Permit(Action.CantReproduce, Status.Reverted)
-                .Permit(Action.ToVerify, Status.Verification);
+                .Permit(BugTrigger.CantReproduce, Status.Reverted)
+                .Permit(BugTrigger.ToVerify, Status.Verification);
 
             stateMachine.Configure(Status.Verification)
-                .Permit(Action.FixOk, Status.Closed)
-                .Permit(Action.FixFailed, Status.Reverted);
+                .Permit(BugTrigger.FixOk, Status.Closed)
+                .Permit(BugTrigger.FixFailed, Status.Reverted);
 
             stateMachine.Configure(Status.Reverted)
-                .Permit(Action.Close, Status.Closed)
-                .Permit(Action.Reopen, Status.Analyzing);
+                .Permit(BugTrigger.Close, Status.Closed)
+                .Permit(BugTrigger.Reopen, Status.Analyzing);
 
             stateMachine.Configure(Status.Closed)
-                .Permit(Action.Reopen, Status.Analyzing);
+                .Permit(BugTrigger.Reopen, Status.Analyzing);
         }
 
-        public void ApplyAction(Action action)
+        public void ApplyAction(BugTrigger trigger)
         {
-            stateMachine.Fire(action);
+            stateMachine.Fire(trigger);
         }
     }
 
@@ -76,16 +76,16 @@ namespace BugApp
             Bug myBug = new Bug();
             Console.WriteLine("Создан: " + myBug.CurrentStatus);
 
-            myBug.ApplyAction(Action.ToAnalysis);
+            myBug.ApplyAction(BugTrigger.ToAnalysis);
             Console.WriteLine("Взят в разбор: " + myBug.CurrentStatus);
 
-            myBug.ApplyAction(Action.ToFix);
+            myBug.ApplyAction(BugTrigger.ToFix);
             Console.WriteLine("Взят в работу (исправление): " + myBug.CurrentStatus);
 
-            myBug.ApplyAction(Action.ToVerify);
+            myBug.ApplyAction(BugTrigger.ToVerify);
             Console.WriteLine("Готов к проверке: " + myBug.CurrentStatus);
 
-            myBug.ApplyAction(Action.FixOk);
+            myBug.ApplyAction(BugTrigger.FixOk);
             Console.WriteLine("Проверка пройдена, статус: " + myBug.CurrentStatus);
         }
     }
